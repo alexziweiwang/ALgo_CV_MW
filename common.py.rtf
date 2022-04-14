@@ -1,0 +1,657 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2636
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 .AppleSystemUIFontMonospaced-Regular;\f1\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red189\green198\blue208;\red89\green156\blue62;\red23\green23\blue23;
+\red202\green202\blue202;\red113\green184\blue255;\red212\green212\blue212;\red167\green197\blue152;\red194\green126\blue101;
+\red70\green137\blue204;}
+{\*\expandedcolortbl;;\cssrgb\c78824\c81961\c85098;\cssrgb\c41569\c66275\c30980;\cssrgb\c11765\c11765\c11765;
+\cssrgb\c83137\c83137\c83137;\cssrgb\c50980\c77647\c100000;\cssrgb\c86275\c86275\c86275;\cssrgb\c70980\c80784\c65882;\cssrgb\c80784\c56863\c47059;
+\cssrgb\c33725\c61176\c83922;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs23\fsmilli11900 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28 \cf3 \cb4 \strokec3 # YOLOv5 common modules\cf5 \cb1 \strokec5 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 import\cf5 \strokec5  math\cb1 \
+\cf6 \cb4 \strokec6 from\cf5 \strokec5  copy \cf6 \strokec6 import\cf5 \strokec5  copy\cb1 \
+\cf6 \cb4 \strokec6 from\cf5 \strokec5  pathlib \cf6 \strokec6 import\cf5 \strokec5  Path\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs23\fsmilli11900 \cf2 \strokec2 import warnings\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28 \cf5 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 import\cf5 \strokec5  numpy \cf6 \strokec6 as\cf5 \strokec5  np\cb1 \
+\cf6 \cb4 \strokec6 import\cf5 \strokec5  pandas \cf6 \strokec6 as\cf5 \strokec5  pd\cb1 \
+\cf6 \cb4 \strokec6 import\cf5 \strokec5  requests\cb1 \
+\cf6 \cb4 \strokec6 import\cf5 \strokec5  torch\cb1 \
+\cf6 \cb4 \strokec6 import\cf5 \strokec5  torch.nn \cf6 \strokec6 as\cf5 \strokec5  nn\cb1 \
+\cf6 \cb4 \strokec6 from\cf5 \strokec5  PIL \cf6 \strokec6 import\cf5 \strokec5  Image\cb1 \
+\cf6 \cb4 \strokec6 from\cf5 \strokec5  torch.cuda \cf6 \strokec6 import\cf5 \strokec5  amp\cb1 \
+\
+\cf6 \cb4 \strokec6 from\cf5 \strokec5  utils.datasets \cf6 \strokec6 import\cf5 \strokec5  letterbox\cb1 \
+\cf6 \cb4 \strokec6 from\cf5 \strokec5  utils.general \cf6 \strokec6 import\cf5 \strokec5  non_max_suppression\cf7 \strokec7 ,\cf5 \strokec5  make_divisible\cf7 \strokec7 ,\cf5 \strokec5  scale_coords\cf7 \strokec7 ,\cf5 \strokec5  increment_path\cf7 \strokec7 ,\cf5 \strokec5  xyxy2xywh\cf7 \strokec7 ,\cf5 \strokec5  save_one_box\cf7 \strokec7 ,\cf5 \strokec5  polygon_non_max_suppression\cb1 \
+\cf6 \cb4 \strokec6 from\cf5 \strokec5  utils.plots \cf6 \strokec6 import\cf5 \strokec5  colors\cf7 \strokec7 ,\cf5 \strokec5  plot_one_box\cf7 \strokec7 ,\cf5 \strokec5  polygon_plot_one_box\cf7 \strokec7 ,\cf5 \strokec5  polygon_plot_one_box_PIL\cb1 \
+\cf6 \cb4 \strokec6 from\cf5 \strokec5  utils.torch_utils \cf6 \strokec6 import\cf5 \strokec5  time_synchronized\cb1 \
+\
+\
+\cf6 \cb4 \strokec6 def\cf5 \strokec5  autopad\cf7 \strokec7 (\cf5 \strokec5 k\cf7 \strokec7 ,\cf5 \strokec5  p=\cf6 \strokec6 None\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # kernel, padding\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Pad to 'same'\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 if\cf5 \strokec5  p \cf6 \strokec6 is\cf5 \strokec5  \cf6 \strokec6 None\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4         p = k // \cf8 \strokec8 2\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 k\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 int\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  \cf7 \strokec7 [\cf5 \strokec5 x // \cf8 \strokec8 2\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  k\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # auto-pad\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 return\cf5 \strokec5  p\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 def\cf5 \strokec5  DWConv\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  k=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  s=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  act=\cf6 \strokec6 True\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Depthwise convolution\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 return\cf5 \strokec5  Conv\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  s\cf7 \strokec7 ,\cf5 \strokec5  g=math.gcd\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ),\cf5 \strokec5  act=act\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Conv\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Standard convolution\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  k=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  s=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  p=\cf6 \strokec6 None\cf7 \strokec7 ,\cf5 \strokec5  g=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  act=\cf6 \strokec6 True\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # ch_in, ch_out, kernel, stride, padding, groups\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 Conv\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .conv = nn.Conv2d\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  s\cf7 \strokec7 ,\cf5 \strokec5  autopad\cf7 \strokec7 (\cf5 \strokec5 k\cf7 \strokec7 ,\cf5 \strokec5  p\cf7 \strokec7 ),\cf5 \strokec5  groups=g\cf7 \strokec7 ,\cf5 \strokec5  bias=\cf6 \strokec6 False\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .bn = nn.BatchNorm2d\cf7 \strokec7 (\cf5 \strokec5 c2\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .act = nn.SiLU\cf7 \strokec7 ()\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  act \cf6 \strokec6 is\cf5 \strokec5  \cf6 \strokec6 True\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  \cf7 \strokec7 (\cf5 \strokec5 act \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 act\cf7 \strokec7 ,\cf5 \strokec5  nn.Module\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  nn.Identity\cf7 \strokec7 ())\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .act\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .bn\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .conv\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )))\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  fuseforward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .act\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .conv\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ))\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  TransformerLayer\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Transformer layer https://arxiv.org/abs/2010.11929 (LayerNorm layers removed for better performance)\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c\cf7 \strokec7 ,\cf5 \strokec5  num_heads\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 ()\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .q = nn.Linear\cf7 \strokec7 (\cf5 \strokec5 c\cf7 \strokec7 ,\cf5 \strokec5  c\cf7 \strokec7 ,\cf5 \strokec5  bias=\cf6 \strokec6 False\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .k = nn.Linear\cf7 \strokec7 (\cf5 \strokec5 c\cf7 \strokec7 ,\cf5 \strokec5  c\cf7 \strokec7 ,\cf5 \strokec5  bias=\cf6 \strokec6 False\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .v = nn.Linear\cf7 \strokec7 (\cf5 \strokec5 c\cf7 \strokec7 ,\cf5 \strokec5  c\cf7 \strokec7 ,\cf5 \strokec5  bias=\cf6 \strokec6 False\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .ma = nn.MultiheadAttention\cf7 \strokec7 (\cf5 \strokec5 embed_dim=c\cf7 \strokec7 ,\cf5 \strokec5  num_heads=num_heads\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .fc1 = nn.Linear\cf7 \strokec7 (\cf5 \strokec5 c\cf7 \strokec7 ,\cf5 \strokec5  c\cf7 \strokec7 ,\cf5 \strokec5  bias=\cf6 \strokec6 False\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .fc2 = nn.Linear\cf7 \strokec7 (\cf5 \strokec5 c\cf7 \strokec7 ,\cf5 \strokec5  c\cf7 \strokec7 ,\cf5 \strokec5  bias=\cf6 \strokec6 False\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         x = \cf6 \strokec6 self\cf5 \strokec5 .ma\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .q\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ),\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .k\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ),\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .v\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ))[\cf8 \strokec8 0\cf7 \strokec7 ]\cf5 \strokec5  + x\cb1 \
+\cb4         x = \cf6 \strokec6 self\cf5 \strokec5 .fc2\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .fc1\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ))\cf5 \strokec5  + x\cb1 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  x\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  TransformerBlock\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Vision Transformer https://arxiv.org/abs/2010.11929\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  num_heads\cf7 \strokec7 ,\cf5 \strokec5  num_layers\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 ()\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .conv = \cf6 \strokec6 None\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 if\cf5 \strokec5  c1 != c2\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 self\cf5 \strokec5 .conv = Conv\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .linear = nn.Linear\cf7 \strokec7 (\cf5 \strokec5 c2\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # learnable position embedding\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .tr = nn.Sequential\cf7 \strokec7 (\cf5 \strokec5 *\cf7 \strokec7 [\cf5 \strokec5 TransformerLayer\cf7 \strokec7 (\cf5 \strokec5 c2\cf7 \strokec7 ,\cf5 \strokec5  num_heads\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  _ \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 range\cf7 \strokec7 (\cf5 \strokec5 num_layers\cf7 \strokec7 )])\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .c2 = c2\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .conv \cf6 \strokec6 is\cf5 \strokec5  \cf6 \strokec6 not\cf5 \strokec5  \cf6 \strokec6 None\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4             x = \cf6 \strokec6 self\cf5 \strokec5 .conv\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         b\cf7 \strokec7 ,\cf5 \strokec5  _\cf7 \strokec7 ,\cf5 \strokec5  w\cf7 \strokec7 ,\cf5 \strokec5  h = x.shape\cb1 \
+\cb4         p = x.flatten\cf7 \strokec7 (\cf8 \strokec8 2\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         p = p.unsqueeze\cf7 \strokec7 (\cf8 \strokec8 0\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         p = p.transpose\cf7 \strokec7 (\cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 3\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         p = p.squeeze\cf7 \strokec7 (\cf8 \strokec8 3\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         e = \cf6 \strokec6 self\cf5 \strokec5 .linear\cf7 \strokec7 (\cf5 \strokec5 p\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         x = p + e\cb1 \
+\
+\cb4         x = \cf6 \strokec6 self\cf5 \strokec5 .tr\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         x = x.unsqueeze\cf7 \strokec7 (\cf8 \strokec8 3\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         x = x.transpose\cf7 \strokec7 (\cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 3\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         x = x.reshape\cf7 \strokec7 (\cf5 \strokec5 b\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .c2\cf7 \strokec7 ,\cf5 \strokec5  w\cf7 \strokec7 ,\cf5 \strokec5  h\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  x\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Bottleneck\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Standard bottleneck\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  shortcut=\cf6 \strokec6 True\cf7 \strokec7 ,\cf5 \strokec5  g=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  e=\cf8 \strokec8 0.5\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # ch_in, ch_out, shortcut, groups, expansion\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 Bottleneck\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         c_ = \cf6 \strokec6 int\cf7 \strokec7 (\cf5 \strokec5 c2 * e\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # hidden channels\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv1 = Conv\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv2 = Conv\cf7 \strokec7 (\cf5 \strokec5 c_\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 3\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  g=g\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .add = shortcut \cf6 \strokec6 and\cf5 \strokec5  c1 == c2\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  x + \cf6 \strokec6 self\cf5 \strokec5 .cv2\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .cv1\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ))\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .add \cf6 \strokec6 else\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .cv2\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .cv1\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ))\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  BottleneckCSP\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # CSP Bottleneck https://github.com/WongKinYiu/CrossStagePartialNetworks\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  n=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  shortcut=\cf6 \strokec6 True\cf7 \strokec7 ,\cf5 \strokec5  g=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  e=\cf8 \strokec8 0.5\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # ch_in, ch_out, number, shortcut, groups, expansion\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 BottleneckCSP\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         c_ = \cf6 \strokec6 int\cf7 \strokec7 (\cf5 \strokec5 c2 * e\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # hidden channels\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv1 = Conv\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv2 = nn.Conv2d\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  bias=\cf6 \strokec6 False\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv3 = nn.Conv2d\cf7 \strokec7 (\cf5 \strokec5 c_\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  bias=\cf6 \strokec6 False\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv4 = Conv\cf7 \strokec7 (\cf8 \strokec8 2\cf5 \strokec5  * c_\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .bn = nn.BatchNorm2d\cf7 \strokec7 (\cf8 \strokec8 2\cf5 \strokec5  * c_\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # applied to cat(cv2, cv3)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .act = nn.LeakyReLU\cf7 \strokec7 (\cf8 \strokec8 0.1\cf7 \strokec7 ,\cf5 \strokec5  inplace=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .m = nn.Sequential\cf7 \strokec7 (\cf5 \strokec5 *\cf7 \strokec7 [\cf5 \strokec5 Bottleneck\cf7 \strokec7 (\cf5 \strokec5 c_\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  shortcut\cf7 \strokec7 ,\cf5 \strokec5  g\cf7 \strokec7 ,\cf5 \strokec5  e=\cf8 \strokec8 1.0\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  _ \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 range\cf7 \strokec7 (\cf5 \strokec5 n\cf7 \strokec7 )])\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         y1 = \cf6 \strokec6 self\cf5 \strokec5 .cv3\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .m\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .cv1\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )))\cf5 \cb1 \strokec5 \
+\cb4         y2 = \cf6 \strokec6 self\cf5 \strokec5 .cv2\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .cv4\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .act\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .bn\cf7 \strokec7 (\cf5 \strokec5 torch.cat\cf7 \strokec7 ((\cf5 \strokec5 y1\cf7 \strokec7 ,\cf5 \strokec5  y2\cf7 \strokec7 ),\cf5 \strokec5  dim=\cf8 \strokec8 1\cf7 \strokec7 ))))\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  C3\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # CSP Bottleneck with 3 convolutions\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  n=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  shortcut=\cf6 \strokec6 True\cf7 \strokec7 ,\cf5 \strokec5  g=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  e=\cf8 \strokec8 0.5\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # ch_in, ch_out, number, shortcut, groups, expansion\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 C3\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         c_ = \cf6 \strokec6 int\cf7 \strokec7 (\cf5 \strokec5 c2 * e\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # hidden channels\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv1 = Conv\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv2 = Conv\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv3 = Conv\cf7 \strokec7 (\cf8 \strokec8 2\cf5 \strokec5  * c_\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # act=FReLU(c2)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .m = nn.Sequential\cf7 \strokec7 (\cf5 \strokec5 *\cf7 \strokec7 [\cf5 \strokec5 Bottleneck\cf7 \strokec7 (\cf5 \strokec5 c_\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  shortcut\cf7 \strokec7 ,\cf5 \strokec5  g\cf7 \strokec7 ,\cf5 \strokec5  e=\cf8 \strokec8 1.0\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  _ \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 range\cf7 \strokec7 (\cf5 \strokec5 n\cf7 \strokec7 )])\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 # self.m = nn.Sequential(*[CrossConv(c_, c_, 3, 1, g, 1.0, shortcut) for _ in range(n)])\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .cv3\cf7 \strokec7 (\cf5 \strokec5 torch.cat\cf7 \strokec7 ((\cf6 \strokec6 self\cf5 \strokec5 .m\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .cv1\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )),\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .cv2\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )),\cf5 \strokec5  dim=\cf8 \strokec8 1\cf7 \strokec7 ))\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  C3TR\cf7 \strokec7 (\cf5 \strokec5 C3\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # C3 module with TransformerBlock()\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  n=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  shortcut=\cf6 \strokec6 True\cf7 \strokec7 ,\cf5 \strokec5  g=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  e=\cf8 \strokec8 0.5\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 ()\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  n\cf7 \strokec7 ,\cf5 \strokec5  shortcut\cf7 \strokec7 ,\cf5 \strokec5  g\cf7 \strokec7 ,\cf5 \strokec5  e\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         c_ = \cf6 \strokec6 int\cf7 \strokec7 (\cf5 \strokec5 c2 * e\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .m = TransformerBlock\cf7 \strokec7 (\cf5 \strokec5 c_\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 4\cf7 \strokec7 ,\cf5 \strokec5  n\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  SPP\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Spatial pyramid pooling layer used in YOLOv3-SPP\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  k=\cf7 \strokec7 (\cf8 \strokec8 5\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 9\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 13\cf7 \strokec7 )):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 SPP\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         c_ = c1 // \cf8 \strokec8 2\cf5 \strokec5   \cf3 \strokec3 # hidden channels\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv1 = Conv\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c_\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .cv2 = Conv\cf7 \strokec7 (\cf5 \strokec5 c_ * \cf7 \strokec7 (\cf6 \strokec6 len\cf7 \strokec7 (\cf5 \strokec5 k\cf7 \strokec7 )\cf5 \strokec5  + \cf8 \strokec8 1\cf7 \strokec7 ),\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .m = nn.ModuleList\cf7 \strokec7 ([\cf5 \strokec5 nn.MaxPool2d\cf7 \strokec7 (\cf5 \strokec5 kernel_size=x\cf7 \strokec7 ,\cf5 \strokec5  stride=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  padding=x // \cf8 \strokec8 2\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  k\cf7 \strokec7 ])\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         x = \cf6 \strokec6 self\cf5 \strokec5 .cv1\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .cv2\cf7 \strokec7 (\cf5 \strokec5 torch.cat\cf7 \strokec7 ([\cf5 \strokec5 x\cf7 \strokec7 ]\cf5 \strokec5  + \cf7 \strokec7 [\cf5 \strokec5 m\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  m \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .m\cf7 \strokec7 ],\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ))\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Focus\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Focus wh information into c-space\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  k=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  s=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  p=\cf6 \strokec6 None\cf7 \strokec7 ,\cf5 \strokec5  g=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  act=\cf6 \strokec6 True\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # ch_in, ch_out, kernel, stride, padding, groups\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 Focus\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .conv = Conv\cf7 \strokec7 (\cf5 \strokec5 c1 * \cf8 \strokec8 4\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  s\cf7 \strokec7 ,\cf5 \strokec5  p\cf7 \strokec7 ,\cf5 \strokec5  g\cf7 \strokec7 ,\cf5 \strokec5  act\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 # self.contract = Contract(gain=2)\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # x(b,c,w,h) -> y(b,4c,w/2,h/2)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .conv\cf7 \strokec7 (\cf5 \strokec5 torch.cat\cf7 \strokec7 ([\cf5 \strokec5 x\cf7 \strokec7 [\cf5 \strokec5 ...\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 ::\cf8 \strokec8 2\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 ::\cf8 \strokec8 2\cf7 \strokec7 ],\cf5 \strokec5  x\cf7 \strokec7 [\cf5 \strokec5 ...\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ::\cf8 \strokec8 2\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 ::\cf8 \strokec8 2\cf7 \strokec7 ],\cf5 \strokec5  x\cf7 \strokec7 [\cf5 \strokec5 ...\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 ::\cf8 \strokec8 2\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ::\cf8 \strokec8 2\cf7 \strokec7 ],\cf5 \strokec5  x\cf7 \strokec7 [\cf5 \strokec5 ...\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ::\cf8 \strokec8 2\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ::\cf8 \strokec8 2\cf7 \strokec7 ]],\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ))\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 # return self.conv(self.contract(x))\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Contract\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Contract width-height into channels, i.e. x(1,64,80,80) to x(1,256,40,40)\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  gain=\cf8 \strokec8 2\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 ()\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .gain = gain\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         N\cf7 \strokec7 ,\cf5 \strokec5  C\cf7 \strokec7 ,\cf5 \strokec5  H\cf7 \strokec7 ,\cf5 \strokec5  W = x.size\cf7 \strokec7 ()\cf5 \strokec5   \cf3 \strokec3 # assert (H / s == 0) and (W / s == 0), 'Indivisible gain'\cf5 \cb1 \strokec5 \
+\cb4         s = \cf6 \strokec6 self\cf5 \strokec5 .gain\cb1 \
+\cb4         x = x.view\cf7 \strokec7 (\cf5 \strokec5 N\cf7 \strokec7 ,\cf5 \strokec5  C\cf7 \strokec7 ,\cf5 \strokec5  H // s\cf7 \strokec7 ,\cf5 \strokec5  s\cf7 \strokec7 ,\cf5 \strokec5  W // s\cf7 \strokec7 ,\cf5 \strokec5  s\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # x(1,64,40,2,40,2)\cf5 \cb1 \strokec5 \
+\cb4         x = x.permute\cf7 \strokec7 (\cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 3\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 5\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 2\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 4\cf7 \strokec7 )\cf5 \strokec5 .contiguous\cf7 \strokec7 ()\cf5 \strokec5   \cf3 \strokec3 # x(1,2,2,64,40,40)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  x.view\cf7 \strokec7 (\cf5 \strokec5 N\cf7 \strokec7 ,\cf5 \strokec5  C * s * s\cf7 \strokec7 ,\cf5 \strokec5  H // s\cf7 \strokec7 ,\cf5 \strokec5  W // s\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # x(1,256,40,40)\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Expand\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Expand channels into width-height, i.e. x(1,64,80,80) to x(1,16,160,160)\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  gain=\cf8 \strokec8 2\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 ()\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .gain = gain\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         N\cf7 \strokec7 ,\cf5 \strokec5  C\cf7 \strokec7 ,\cf5 \strokec5  H\cf7 \strokec7 ,\cf5 \strokec5  W = x.size\cf7 \strokec7 ()\cf5 \strokec5   \cf3 \strokec3 # assert C / s ** 2 == 0, 'Indivisible gain'\cf5 \cb1 \strokec5 \
+\cb4         s = \cf6 \strokec6 self\cf5 \strokec5 .gain\cb1 \
+\cb4         x = x.view\cf7 \strokec7 (\cf5 \strokec5 N\cf7 \strokec7 ,\cf5 \strokec5  s\cf7 \strokec7 ,\cf5 \strokec5  s\cf7 \strokec7 ,\cf5 \strokec5  C // s ** \cf8 \strokec8 2\cf7 \strokec7 ,\cf5 \strokec5  H\cf7 \strokec7 ,\cf5 \strokec5  W\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # x(1,2,2,16,80,80)\cf5 \cb1 \strokec5 \
+\cb4         x = x.permute\cf7 \strokec7 (\cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 3\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 4\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 5\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 2\cf7 \strokec7 )\cf5 \strokec5 .contiguous\cf7 \strokec7 ()\cf5 \strokec5   \cf3 \strokec3 # x(1,16,80,2,80,2)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  x.view\cf7 \strokec7 (\cf5 \strokec5 N\cf7 \strokec7 ,\cf5 \strokec5  C // s ** \cf8 \strokec8 2\cf7 \strokec7 ,\cf5 \strokec5  H * s\cf7 \strokec7 ,\cf5 \strokec5  W * s\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # x(1,16,160,160)\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Concat\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Concatenate a list of tensors along dimension\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  dimension=\cf8 \strokec8 1\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 Concat\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .d = dimension\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  torch.cat\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .d\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  NMS\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Non-Maximum Suppression (NMS) module\cf5 \cb1 \strokec5 \
+\cb4     conf = \cf8 \strokec8 0.25\cf5 \strokec5   \cf3 \strokec3 # confidence threshold\cf5 \cb1 \strokec5 \
+\cb4     iou = \cf8 \strokec8 0.45\cf5 \strokec5   \cf3 \strokec3 # IoU threshold\cf5 \cb1 \strokec5 \
+\cb4     classes = \cf6 \strokec6 None\cf5 \strokec5   \cf3 \strokec3 # (optional list) filter by class\cf5 \cb1 \strokec5 \
+\cb4     max_det = \cf8 \strokec8 1000\cf5 \strokec5   \cf3 \strokec3 # maximum number of detections per image\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 NMS\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  non_max_suppression\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 [\cf8 \strokec8 0\cf7 \strokec7 ],\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .conf\cf7 \strokec7 ,\cf5 \strokec5  iou_thres=\cf6 \strokec6 self\cf5 \strokec5 .iou\cf7 \strokec7 ,\cf5 \strokec5  classes=\cf6 \strokec6 self\cf5 \strokec5 .classes\cf7 \strokec7 ,\cf5 \strokec5  max_det=\cf6 \strokec6 self\cf5 \strokec5 .max_det\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  AutoShape\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # input-robust model wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS\cf5 \cb1 \strokec5 \
+\cb4     conf = \cf8 \strokec8 0.25\cf5 \strokec5   \cf3 \strokec3 # NMS confidence threshold\cf5 \cb1 \strokec5 \
+\cb4     iou = \cf8 \strokec8 0.45\cf5 \strokec5   \cf3 \strokec3 # NMS IoU threshold\cf5 \cb1 \strokec5 \
+\cb4     classes = \cf6 \strokec6 None\cf5 \strokec5   \cf3 \strokec3 # (optional list) filter by class\cf5 \cb1 \strokec5 \
+\cb4     max_det = \cf8 \strokec8 1000\cf5 \strokec5   \cf3 \strokec3 # maximum number of detections per image\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  model\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 AutoShape\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .model = model.\cf6 \strokec6 eval\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  autoshape\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 print\cf7 \strokec7 (\cf9 \strokec9 'AutoShape already enabled, skipping... '\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # model already converted to model.autoshape()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf10 \strokec10 @torch\cf5 \strokec5 .no_grad\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  imgs\cf7 \strokec7 ,\cf5 \strokec5  size=\cf8 \strokec8 640\cf7 \strokec7 ,\cf5 \strokec5  augment=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  profile=\cf6 \strokec6 False\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 # Inference from various sources. For height=640, width=1280, RGB images example inputs are:\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   filename:   imgs = 'data/images/zidane.jpg'\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   URI:             = 'https://github.com/ultralytics/yolov5/releases/download/v1.0/zidane.jpg'\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   OpenCV:          = cv2.imread('image.jpg')[:,:,::-1]  # HWC BGR to RGB x(640,1280,3)\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   PIL:             = Image.open('image.jpg')  # HWC x(640,1280,3)\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   numpy:           = np.zeros((640,1280,3))  # HWC\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   torch:           = torch.zeros(16,3,320,640)  # BCHW (scaled to size=640, 0-1 values)\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   multiple:        = [Image.open('image1.jpg'), Image.open('image2.jpg'), ...]  # list of images\cf5 \cb1 \strokec5 \
+\
+\cb4         t = \cf7 \strokec7 [\cf5 \strokec5 time_synchronized\cf7 \strokec7 ()]\cf5 \cb1 \strokec5 \
+\cb4         p = \cf6 \strokec6 next\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .model.parameters\cf7 \strokec7 ())\cf5 \strokec5   \cf3 \strokec3 # for device and type\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ,\cf5 \strokec5  torch.Tensor\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # torch\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 with\cf5 \strokec5  amp.autocast\cf7 \strokec7 (\cf5 \strokec5 enabled=p.device.\cf6 \strokec6 type\cf5 \strokec5  != \cf9 \strokec9 'cpu'\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .model\cf7 \strokec7 (\cf5 \strokec5 imgs.to\cf7 \strokec7 (\cf5 \strokec5 p.device\cf7 \strokec7 )\cf5 \strokec5 .type_as\cf7 \strokec7 (\cf5 \strokec5 p\cf7 \strokec7 ),\cf5 \strokec5  augment\cf7 \strokec7 ,\cf5 \strokec5  profile\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # inference\cf5 \cb1 \strokec5 \
+\
+\cb4         \cf3 \strokec3 # Pre-process\cf5 \cb1 \strokec5 \
+\cb4         n\cf7 \strokec7 ,\cf5 \strokec5  imgs = \cf7 \strokec7 (\cf6 \strokec6 len\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ),\cf5 \strokec5  imgs\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 list\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  \cf7 \strokec7 (\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 [\cf5 \strokec5 imgs\cf7 \strokec7 ])\cf5 \strokec5   \cf3 \strokec3 # number of images, list of images\cf5 \cb1 \strokec5 \
+\cb4         shape0\cf7 \strokec7 ,\cf5 \strokec5  shape1\cf7 \strokec7 ,\cf5 \strokec5  files = \cf7 \strokec7 [],\cf5 \strokec5  \cf7 \strokec7 [],\cf5 \strokec5  \cf7 \strokec7 []\cf5 \strokec5   \cf3 \strokec3 # image and inference shapes, filenames\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 for\cf5 \strokec5  i\cf7 \strokec7 ,\cf5 \strokec5  im \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 enumerate\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4             f = f\cf9 \strokec9 'image\{i\}'\cf5 \strokec5   \cf3 \strokec3 # filename\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 str\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # filename or uri\cf5 \cb1 \strokec5 \
+\cb4                 im\cf7 \strokec7 ,\cf5 \strokec5  f = np.asarray\cf7 \strokec7 (\cf5 \strokec5 Image.\cf6 \strokec6 open\cf7 \strokec7 (\cf5 \strokec5 requests.get\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  stream=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5 .raw \cf6 \strokec6 if\cf5 \strokec5  im.startswith\cf7 \strokec7 (\cf9 \strokec9 'http'\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  im\cf7 \strokec7 )),\cf5 \strokec5  im\cb1 \
+\cb4             \cf6 \strokec6 elif\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  Image.Image\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # PIL Image\cf5 \cb1 \strokec5 \
+\cb4                 im\cf7 \strokec7 ,\cf5 \strokec5  f = np.asarray\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ),\cf5 \strokec5  \cf6 \strokec6 getattr\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'filename'\cf7 \strokec7 ,\cf5 \strokec5  f\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 or\cf5 \strokec5  f\cb1 \
+\cb4             files.append\cf7 \strokec7 (\cf5 \strokec5 Path\cf7 \strokec7 (\cf5 \strokec5 f\cf7 \strokec7 )\cf5 \strokec5 .with_suffix\cf7 \strokec7 (\cf9 \strokec9 '.jpg'\cf7 \strokec7 )\cf5 \strokec5 .name\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  im.shape\cf7 \strokec7 [\cf8 \strokec8 0\cf7 \strokec7 ]\cf5 \strokec5  < \cf8 \strokec8 5\cf7 \strokec7 :\cf5 \strokec5   \cf3 \strokec3 # image in CHW\cf5 \cb1 \strokec5 \
+\cb4                 im = im.transpose\cf7 \strokec7 ((\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 2\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 ))\cf5 \strokec5   \cf3 \strokec3 # reverse dataloader .transpose(2, 0, 1)\cf5 \cb1 \strokec5 \
+\cb4             im = im\cf7 \strokec7 [:,\cf5 \strokec5  \cf7 \strokec7 :,\cf5 \strokec5  \cf7 \strokec7 :\cf8 \strokec8 3\cf7 \strokec7 ]\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  im.ndim == \cf8 \strokec8 3\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  np.tile\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 [:,\cf5 \strokec5  \cf7 \strokec7 :,\cf5 \strokec5  \cf6 \strokec6 None\cf7 \strokec7 ],\cf5 \strokec5  \cf8 \strokec8 3\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # enforce 3ch input\cf5 \cb1 \strokec5 \
+\cb4             s = im.shape\cf7 \strokec7 [:\cf8 \strokec8 2\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # HWC\cf5 \cb1 \strokec5 \
+\cb4             shape0.append\cf7 \strokec7 (\cf5 \strokec5 s\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # image shape\cf5 \cb1 \strokec5 \
+\cb4             g = \cf7 \strokec7 (\cf5 \strokec5 size / \cf6 \strokec6 max\cf7 \strokec7 (\cf5 \strokec5 s\cf7 \strokec7 ))\cf5 \strokec5   \cf3 \strokec3 # gain\cf5 \cb1 \strokec5 \
+\cb4             shape1.append\cf7 \strokec7 ([\cf5 \strokec5 y * g \cf6 \strokec6 for\cf5 \strokec5  y \cf6 \strokec6 in\cf5 \strokec5  s\cf7 \strokec7 ])\cf5 \cb1 \strokec5 \
+\cb4             imgs\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]\cf5 \strokec5  = im \cf6 \strokec6 if\cf5 \strokec5  im.data.contiguous \cf6 \strokec6 else\cf5 \strokec5  np.ascontiguousarray\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # update\cf5 \cb1 \strokec5 \
+\cb4         shape1 = \cf7 \strokec7 [\cf5 \strokec5 make_divisible\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 int\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .stride.\cf6 \strokec6 max\cf7 \strokec7 ()))\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  np.stack\cf7 \strokec7 (\cf5 \strokec5 shape1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 max\cf7 \strokec7 (\cf8 \strokec8 0\cf7 \strokec7 )]\cf5 \strokec5   \cf3 \strokec3 # inference shape\cf5 \cb1 \strokec5 \
+\cb4         x = \cf7 \strokec7 [\cf5 \strokec5 letterbox\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  new_shape=shape1\cf7 \strokec7 ,\cf5 \strokec5  auto=\cf6 \strokec6 False\cf7 \strokec7 )[\cf8 \strokec8 0\cf7 \strokec7 ]\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  im \cf6 \strokec6 in\cf5 \strokec5  imgs\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # pad\cf5 \cb1 \strokec5 \
+\cb4         x = np.stack\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  n > \cf8 \strokec8 1\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  x\cf7 \strokec7 [\cf8 \strokec8 0\cf7 \strokec7 ][\cf6 \strokec6 None\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # stack\cf5 \cb1 \strokec5 \
+\cb4         x = np.ascontiguousarray\cf7 \strokec7 (\cf5 \strokec5 x.transpose\cf7 \strokec7 ((\cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 3\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 2\cf7 \strokec7 )))\cf5 \strokec5   \cf3 \strokec3 # BHWC to BCHW\cf5 \cb1 \strokec5 \
+\cb4         x = torch.from_numpy\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )\cf5 \strokec5 .to\cf7 \strokec7 (\cf5 \strokec5 p.device\cf7 \strokec7 )\cf5 \strokec5 .type_as\cf7 \strokec7 (\cf5 \strokec5 p\cf7 \strokec7 )\cf5 \strokec5  / \cf8 \strokec8 255\cf5 \strokec5 .  \cf3 \strokec3 # uint8 to fp16/32\cf5 \cb1 \strokec5 \
+\cb4         t.append\cf7 \strokec7 (\cf5 \strokec5 time_synchronized\cf7 \strokec7 ())\cf5 \cb1 \strokec5 \
+\
+\cb4         \cf6 \strokec6 with\cf5 \strokec5  amp.autocast\cf7 \strokec7 (\cf5 \strokec5 enabled=p.device.\cf6 \strokec6 type\cf5 \strokec5  != \cf9 \strokec9 'cpu'\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4             \cf3 \strokec3 # Inference\cf5 \cb1 \strokec5 \
+\cb4             y = \cf6 \strokec6 self\cf5 \strokec5 .model\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  augment\cf7 \strokec7 ,\cf5 \strokec5  profile\cf7 \strokec7 )[\cf8 \strokec8 0\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # forward\cf5 \cb1 \strokec5 \
+\cb4             t.append\cf7 \strokec7 (\cf5 \strokec5 time_synchronized\cf7 \strokec7 ())\cf5 \cb1 \strokec5 \
+\cb4             \cb1 \
+\cb4             \cf3 \strokec3 # Post-process\cf5 \cb1 \strokec5 \
+\cb4             y = non_max_suppression\cf7 \strokec7 (\cf5 \strokec5 y\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .conf\cf7 \strokec7 ,\cf5 \strokec5  iou_thres=\cf6 \strokec6 self\cf5 \strokec5 .iou\cf7 \strokec7 ,\cf5 \strokec5  classes=\cf6 \strokec6 self\cf5 \strokec5 .classes\cf7 \strokec7 ,\cf5 \strokec5  max_det=\cf6 \strokec6 self\cf5 \strokec5 .max_det\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # NMS\cf5 \cb1 \strokec5 \
+\
+\cb4             \cf6 \strokec6 for\cf5 \strokec5  i \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 range\cf7 \strokec7 (\cf5 \strokec5 n\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4                 scale_coords\cf7 \strokec7 (\cf5 \strokec5 shape1\cf7 \strokec7 ,\cf5 \strokec5  y\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ][:,\cf5 \strokec5  \cf7 \strokec7 :\cf8 \strokec8 4\cf7 \strokec7 ],\cf5 \strokec5  shape0\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ])\cf5 \cb1 \strokec5 \
+\
+\cb4             t.append\cf7 \strokec7 (\cf5 \strokec5 time_synchronized\cf7 \strokec7 ())\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 return\cf5 \strokec5  Detections\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ,\cf5 \strokec5  y\cf7 \strokec7 ,\cf5 \strokec5  files\cf7 \strokec7 ,\cf5 \strokec5  t\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .names\cf7 \strokec7 ,\cf5 \strokec5  x.shape\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Detections\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # detections class for YOLOv5 inference results\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  imgs\cf7 \strokec7 ,\cf5 \strokec5  pred\cf7 \strokec7 ,\cf5 \strokec5  files\cf7 \strokec7 ,\cf5 \strokec5  times=\cf6 \strokec6 None\cf7 \strokec7 ,\cf5 \strokec5  names=\cf6 \strokec6 None\cf7 \strokec7 ,\cf5 \strokec5  shape=\cf6 \strokec6 None\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 Detections\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         d = pred\cf7 \strokec7 [\cf8 \strokec8 0\cf7 \strokec7 ]\cf5 \strokec5 .device  \cf3 \strokec3 # device\cf5 \cb1 \strokec5 \
+\cb4         gn = \cf7 \strokec7 [\cf5 \strokec5 torch.tensor\cf7 \strokec7 ([\cf5 \strokec5 *\cf7 \strokec7 [\cf5 \strokec5 im.shape\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  i \cf6 \strokec6 in\cf5 \strokec5  \cf7 \strokec7 [\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 ]],\cf5 \strokec5  \cf8 \strokec8 1\cf5 \strokec5 .\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf5 \strokec5 .\cf7 \strokec7 ],\cf5 \strokec5  device=d\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  im \cf6 \strokec6 in\cf5 \strokec5  imgs\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # normalizations\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .imgs = imgs  \cf3 \strokec3 # list of images as numpy arrays\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .pred = pred  \cf3 \strokec3 # list of tensors pred[0] = (xyxy, conf, cls)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .names = names  \cf3 \strokec3 # class names\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .files = files  \cf3 \strokec3 # image filenames\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .xyxy = pred  \cf3 \strokec3 # xyxy pixels\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .xywh = \cf7 \strokec7 [\cf5 \strokec5 xyxy2xywh\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  pred\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # xywh pixels\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .xyxyn = \cf7 \strokec7 [\cf5 \strokec5 x / g \cf6 \strokec6 for\cf5 \strokec5  x\cf7 \strokec7 ,\cf5 \strokec5  g \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 zip\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .xyxy\cf7 \strokec7 ,\cf5 \strokec5  gn\cf7 \strokec7 )]\cf5 \strokec5   \cf3 \strokec3 # xyxy normalized\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .xywhn = \cf7 \strokec7 [\cf5 \strokec5 x / g \cf6 \strokec6 for\cf5 \strokec5  x\cf7 \strokec7 ,\cf5 \strokec5  g \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 zip\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .xywh\cf7 \strokec7 ,\cf5 \strokec5  gn\cf7 \strokec7 )]\cf5 \strokec5   \cf3 \strokec3 # xywh normalized\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .n = \cf6 \strokec6 len\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .pred\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # number of images (batch size)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .t = \cf6 \strokec6 tuple\cf7 \strokec7 ((\cf5 \strokec5 times\cf7 \strokec7 [\cf5 \strokec5 i + \cf8 \strokec8 1\cf7 \strokec7 ]\cf5 \strokec5  - times\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ])\cf5 \strokec5  * \cf8 \strokec8 1000\cf5 \strokec5  / \cf6 \strokec6 self\cf5 \strokec5 .n \cf6 \strokec6 for\cf5 \strokec5  i \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 range\cf7 \strokec7 (\cf8 \strokec8 3\cf7 \strokec7 ))\cf5 \strokec5   \cf3 \strokec3 # timestamps (ms)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .s = shape  \cf3 \strokec3 # inference BCHW shape\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  display\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  pprint=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  show=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  save=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  crop=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  render=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  save_dir=Path\cf7 \strokec7 (\cf9 \strokec9 ''\cf7 \strokec7 )):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 for\cf5 \strokec5  i\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  pred\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 enumerate\cf7 \strokec7 (\cf6 \strokec6 zip\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .imgs\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .pred\cf7 \strokec7 )):\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 str\cf5 \strokec5  = f\cf9 \strokec9 'image \{i + 1\}/\{len(self.pred)\}: \{im.shape[0]\}x\{im.shape[1]\} '\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  pred \cf6 \strokec6 is\cf5 \strokec5  \cf6 \strokec6 not\cf5 \strokec5  \cf6 \strokec6 None\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 for\cf5 \strokec5  c \cf6 \strokec6 in\cf5 \strokec5  pred\cf7 \strokec7 [:,\cf5 \strokec5  \cf8 \strokec8 -1\cf7 \strokec7 ]\cf5 \strokec5 .unique\cf7 \strokec7 ():\cf5 \cb1 \strokec5 \
+\cb4                     n = \cf7 \strokec7 (\cf5 \strokec5 pred\cf7 \strokec7 [:,\cf5 \strokec5  \cf8 \strokec8 -1\cf7 \strokec7 ]\cf5 \strokec5  == c\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 sum\cf7 \strokec7 ()\cf5 \strokec5   \cf3 \strokec3 # detections per class\cf5 \cb1 \strokec5 \
+\cb4                     \cf6 \strokec6 str\cf5 \strokec5  += f\cf9 \strokec9 "\{n\} \{self.names[int(c)]\}\{'s' * (n > 1)\}, "\cf5 \strokec5   \cf3 \strokec3 # add to string\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 if\cf5 \strokec5  show \cf6 \strokec6 or\cf5 \strokec5  save \cf6 \strokec6 or\cf5 \strokec5  render \cf6 \strokec6 or\cf5 \strokec5  crop\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                     \cf6 \strokec6 for\cf5 \strokec5  *box\cf7 \strokec7 ,\cf5 \strokec5  conf\cf7 \strokec7 ,\cf5 \strokec5  cls \cf6 \strokec6 in\cf5 \strokec5  pred\cf7 \strokec7 :\cf5 \strokec5   \cf3 \strokec3 # xyxy, confidence, class\cf5 \cb1 \strokec5 \
+\cb4                         label = f\cf9 \strokec9 '\{self.names[int(cls)]\} \{conf:.2f\}'\cf5 \cb1 \strokec5 \
+\cb4                         \cf6 \strokec6 if\cf5 \strokec5  crop\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                             save_one_box\cf7 \strokec7 (\cf5 \strokec5 box\cf7 \strokec7 ,\cf5 \strokec5  im\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 file\cf5 \strokec5 =save_dir / \cf9 \strokec9 'crops'\cf5 \strokec5  / \cf6 \strokec6 self\cf5 \strokec5 .names\cf7 \strokec7 [\cf6 \strokec6 int\cf7 \strokec7 (\cf5 \strokec5 cls\cf7 \strokec7 )]\cf5 \strokec5  / \cf6 \strokec6 self\cf5 \strokec5 .files\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ])\cf5 \cb1 \strokec5 \
+\cb4                         \cf6 \strokec6 else\cf7 \strokec7 :\cf5 \strokec5   \cf3 \strokec3 # all others\cf5 \cb1 \strokec5 \
+\cb4                             plot_one_box\cf7 \strokec7 (\cf5 \strokec5 box\cf7 \strokec7 ,\cf5 \strokec5  im\cf7 \strokec7 ,\cf5 \strokec5  label=label\cf7 \strokec7 ,\cf5 \strokec5  color=colors\cf7 \strokec7 (\cf5 \strokec5 cls\cf7 \strokec7 ))\cf5 \cb1 \strokec5 \
+\
+\cb4             im = Image.fromarray\cf7 \strokec7 (\cf5 \strokec5 im.astype\cf7 \strokec7 (\cf5 \strokec5 np.uint8\cf7 \strokec7 ))\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  np.ndarray\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  im  \cf3 \strokec3 # from np\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  pprint\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 print\cf7 \strokec7 (\cf6 \strokec6 str\cf5 \strokec5 .rstrip\cf7 \strokec7 (\cf9 \strokec9 ', '\cf7 \strokec7 ))\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  show\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 im.show\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .files\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ])\cf5 \strokec5   \cf3 \strokec3 # show\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  save\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 f = \cf6 \strokec6 self\cf5 \strokec5 .files\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]\cf5 \cb1 \strokec5 \
+\cb4                 im.save\cf7 \strokec7 (\cf5 \strokec5 save_dir / f\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # save\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 print\cf7 \strokec7 (\cf5 \strokec5 f\cf9 \strokec9 "\{'Saved' * (i == 0)\} \{f\}"\cf7 \strokec7 ,\cf5 \strokec5  end=\cf9 \strokec9 ','\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  i < \cf6 \strokec6 self\cf5 \strokec5 .n - \cf8 \strokec8 1\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  f\cf9 \strokec9 ' to \{save_dir\}\\n'\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  render\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 self\cf5 \strokec5 .imgs\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]\cf5 \strokec5  = np.asarray\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 print\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .display\cf7 \strokec7 (\cf5 \strokec5 pprint=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # print results\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 print\cf7 \strokec7 (\cf5 \strokec5 f\cf9 \strokec9 'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape \{tuple(self.s)\}'\cf5 \strokec5  % \cf6 \strokec6 self\cf5 \strokec5 .t\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  show\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .display\cf7 \strokec7 (\cf5 \strokec5 show=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # show results\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  save\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  save_dir=\cf9 \strokec9 'runs/hub/exp'\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         save_dir = increment_path\cf7 \strokec7 (\cf5 \strokec5 save_dir\cf7 \strokec7 ,\cf5 \strokec5  exist_ok=save_dir != \cf9 \strokec9 'runs/hub/exp'\cf7 \strokec7 ,\cf5 \strokec5  mkdir=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # increment save_dir\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .display\cf7 \strokec7 (\cf5 \strokec5 save=\cf6 \strokec6 True\cf7 \strokec7 ,\cf5 \strokec5  save_dir=save_dir\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # save results\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  crop\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  save_dir=\cf9 \strokec9 'runs/hub/exp'\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         save_dir = increment_path\cf7 \strokec7 (\cf5 \strokec5 save_dir\cf7 \strokec7 ,\cf5 \strokec5  exist_ok=save_dir != \cf9 \strokec9 'runs/hub/exp'\cf7 \strokec7 ,\cf5 \strokec5  mkdir=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # increment save_dir\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .display\cf7 \strokec7 (\cf5 \strokec5 crop=\cf6 \strokec6 True\cf7 \strokec7 ,\cf5 \strokec5  save_dir=save_dir\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # crop results\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 print\cf7 \strokec7 (\cf5 \strokec5 f\cf9 \strokec9 'Saved results to \{save_dir\}\\n'\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  render\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .display\cf7 \strokec7 (\cf5 \strokec5 render=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # render results\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .imgs\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  pandas\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 # return detections as pandas DataFrames, i.e. print(results.pandas().xyxy[0])\cf5 \cb1 \strokec5 \
+\cb4         new = copy\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # return copy\cf5 \cb1 \strokec5 \
+\cb4         ca = \cf9 \strokec9 'xmin'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'ymin'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xmax'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'ymax'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'confidence'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'class'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'name'\cf5 \strokec5   \cf3 \strokec3 # xyxy columns\cf5 \cb1 \strokec5 \
+\cb4         cb = \cf9 \strokec9 'xcenter'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'ycenter'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'width'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'height'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'confidence'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'class'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'name'\cf5 \strokec5   \cf3 \strokec3 # xywh columns\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 for\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  c \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 zip\cf7 \strokec7 ([\cf9 \strokec9 'xyxy'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xyxyn'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xywh'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xywhn'\cf7 \strokec7 ],\cf5 \strokec5  \cf7 \strokec7 [\cf5 \strokec5 ca\cf7 \strokec7 ,\cf5 \strokec5  ca\cf7 \strokec7 ,\cf5 \strokec5  cb\cf7 \strokec7 ,\cf5 \strokec5  cb\cf7 \strokec7 ]):\cf5 \cb1 \strokec5 \
+\cb4             a = \cf7 \strokec7 [[\cf5 \strokec5 x\cf7 \strokec7 [:\cf8 \strokec8 5\cf7 \strokec7 ]\cf5 \strokec5  + \cf7 \strokec7 [\cf6 \strokec6 int\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 [\cf8 \strokec8 5\cf7 \strokec7 ]),\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .names\cf7 \strokec7 [\cf6 \strokec6 int\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 [\cf8 \strokec8 5\cf7 \strokec7 ])]]\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  x.tolist\cf7 \strokec7 ()]\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 getattr\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 )]\cf5 \strokec5   \cf3 \strokec3 # update\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 setattr\cf7 \strokec7 (\cf5 \strokec5 new\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 [\cf5 \strokec5 pd.DataFrame\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  columns=c\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  a\cf7 \strokec7 ])\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  new\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  tolist\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 # return a list of Detections objects, i.e. 'for result in results.tolist():'\cf5 \cb1 \strokec5 \
+\cb4         x = \cf7 \strokec7 [\cf5 \strokec5 Detections\cf7 \strokec7 ([\cf6 \strokec6 self\cf5 \strokec5 .imgs\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]],\cf5 \strokec5  \cf7 \strokec7 [\cf6 \strokec6 self\cf5 \strokec5 .pred\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]],\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .names\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .s\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  i \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 range\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .n\cf7 \strokec7 )]\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 for\cf5 \strokec5  d \cf6 \strokec6 in\cf5 \strokec5  x\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 for\cf5 \strokec5  k \cf6 \strokec6 in\cf5 \strokec5  \cf7 \strokec7 [\cf9 \strokec9 'imgs'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'pred'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xyxy'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xyxyn'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xywh'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xywhn'\cf7 \strokec7 ]:\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 setattr\cf7 \strokec7 (\cf5 \strokec5 d\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 getattr\cf7 \strokec7 (\cf5 \strokec5 d\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 )[\cf8 \strokec8 0\cf7 \strokec7 ])\cf5 \strokec5   \cf3 \strokec3 # pop out of list\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  x\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  __len__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .n\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Classify\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Classification head, i.e. x(b,c1,20,20) to x(b,c2)\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  k=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  s=\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  p=\cf6 \strokec6 None\cf7 \strokec7 ,\cf5 \strokec5  g=\cf8 \strokec8 1\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # ch_in, ch_out, kernel, stride, padding, groups\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 Classify\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .aap = nn.AdaptiveAvgPool2d\cf7 \strokec7 (\cf8 \strokec8 1\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # to x(b,c1,1,1)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .conv = nn.Conv2d\cf7 \strokec7 (\cf5 \strokec5 c1\cf7 \strokec7 ,\cf5 \strokec5  c2\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  s\cf7 \strokec7 ,\cf5 \strokec5  autopad\cf7 \strokec7 (\cf5 \strokec5 k\cf7 \strokec7 ,\cf5 \strokec5  p\cf7 \strokec7 ),\cf5 \strokec5  groups=g\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # to x(b,c2,1,1)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .flat = nn.Flatten\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         z = torch.cat\cf7 \strokec7 ([\cf6 \strokec6 self\cf5 \strokec5 .aap\cf7 \strokec7 (\cf5 \strokec5 y\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  y \cf6 \strokec6 in\cf5 \strokec5  \cf7 \strokec7 (\cf5 \strokec5 x \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 list\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  \cf7 \strokec7 [\cf5 \strokec5 x\cf7 \strokec7 ])],\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # cat if list\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .flat\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .conv\cf7 \strokec7 (\cf5 \strokec5 z\cf7 \strokec7 ))\cf5 \strokec5   \cf3 \strokec3 # flatten to x(b,c2)\cf5 \cb1 \strokec5 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 # Ancillary functions with polygon anchor boxes-------------------------------------------------------------------------------------------\cf5 \cb1 \strokec5 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Polygon_NMS\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # Non-Maximum Suppression (NMS) module for Polygon Anchors\cf5 \cb1 \strokec5 \
+\cb4     conf = \cf8 \strokec8 0.25\cf5 \strokec5   \cf3 \strokec3 # confidence threshold\cf5 \cb1 \strokec5 \
+\cb4     iou = \cf8 \strokec8 0.45\cf5 \strokec5   \cf3 \strokec3 # IoU threshold\cf5 \cb1 \strokec5 \
+\cb4     classes = \cf6 \strokec6 None\cf5 \strokec5   \cf3 \strokec3 # (optional list) filter by class\cf5 \cb1 \strokec5 \
+\cb4     max_det = \cf8 \strokec8 1000\cf5 \strokec5   \cf3 \strokec3 # maximum number of detections per image\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 Polygon_NMS\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cb1 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  x\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  polygon_non_max_suppression\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 [\cf8 \strokec8 0\cf7 \strokec7 ],\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .conf\cf7 \strokec7 ,\cf5 \strokec5  iou_thres=\cf6 \strokec6 self\cf5 \strokec5 .iou\cf7 \strokec7 ,\cf5 \strokec5  classes=\cf6 \strokec6 self\cf5 \strokec5 .classes\cf7 \strokec7 ,\cf5 \strokec5  max_det=\cf6 \strokec6 self\cf5 \strokec5 .max_det\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4     \cb1 \
+\cb4     \cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Polygon_AutoShape\cf7 \strokec7 (\cf5 \strokec5 nn.Module\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # input-robust polygon model wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and Polygon_NMS\cf5 \cb1 \strokec5 \
+\cb4     conf = \cf8 \strokec8 0.25\cf5 \strokec5   \cf3 \strokec3 # Polygon NMS confidence threshold\cf5 \cb1 \strokec5 \
+\cb4     iou = \cf8 \strokec8 0.45\cf5 \strokec5   \cf3 \strokec3 # Polygon NMS IoU threshold\cf5 \cb1 \strokec5 \
+\cb4     classes = \cf6 \strokec6 None\cf5 \strokec5   \cf3 \strokec3 # (optional list) filter by class\cf5 \cb1 \strokec5 \
+\cb4     max_det = \cf8 \strokec8 1000\cf5 \strokec5   \cf3 \strokec3 # maximum number of detections per image\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  model\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 Polygon_AutoShape\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .model = model.\cf6 \strokec6 eval\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  autoshape\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 print\cf7 \strokec7 (\cf9 \strokec9 'Polygon_AutoShape already enabled, skipping... '\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # model already converted to model.autoshape()\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf10 \strokec10 @torch\cf5 \strokec5 .no_grad\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  forward\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  imgs\cf7 \strokec7 ,\cf5 \strokec5  size=\cf8 \strokec8 640\cf7 \strokec7 ,\cf5 \strokec5  augment=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  profile=\cf6 \strokec6 False\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 # Inference from various sources. For height=640, width=1280, RGB images example inputs are:\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   filename:   imgs = 'data/images/zidane.jpg'\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   URI:             = 'https://github.com/ultralytics/yolov5/releases/download/v1.0/zidane.jpg'\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   OpenCV:          = cv2.imread('image.jpg')[:,:,::-1]  # HWC BGR to RGB x(640,1280,3)\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   PIL:             = Image.open('image.jpg')  # HWC x(640,1280,3)\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   numpy:           = np.zeros((640,1280,3))  # HWC\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   torch:           = torch.zeros(16,3,320,640)  # BCHW (scaled to size=640, 0-1 values)\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 #   multiple:        = [Image.open('image1.jpg'), Image.open('image2.jpg'), ...]  # list of images\cf5 \cb1 \strokec5 \
+\
+\cb4         t = \cf7 \strokec7 [\cf5 \strokec5 time_synchronized\cf7 \strokec7 ()]\cf5 \cb1 \strokec5 \
+\cb4         p = \cf6 \strokec6 next\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .model.parameters\cf7 \strokec7 ())\cf5 \strokec5   \cf3 \strokec3 # for device and type\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ,\cf5 \strokec5  torch.Tensor\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # torch\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 with\cf5 \strokec5  amp.autocast\cf7 \strokec7 (\cf5 \strokec5 enabled=p.device.\cf6 \strokec6 type\cf5 \strokec5  != \cf9 \strokec9 'cpu'\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .model\cf7 \strokec7 (\cf5 \strokec5 imgs.to\cf7 \strokec7 (\cf5 \strokec5 p.device\cf7 \strokec7 )\cf5 \strokec5 .type_as\cf7 \strokec7 (\cf5 \strokec5 p\cf7 \strokec7 ),\cf5 \strokec5  augment\cf7 \strokec7 ,\cf5 \strokec5  profile\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # inference\cf5 \cb1 \strokec5 \
+\
+\cb4         \cf3 \strokec3 # Pre-process\cf5 \cb1 \strokec5 \
+\cb4         n\cf7 \strokec7 ,\cf5 \strokec5  imgs = \cf7 \strokec7 (\cf6 \strokec6 len\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ),\cf5 \strokec5  imgs\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 list\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  \cf7 \strokec7 (\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 [\cf5 \strokec5 imgs\cf7 \strokec7 ])\cf5 \strokec5   \cf3 \strokec3 # number of images, list of images\cf5 \cb1 \strokec5 \
+\cb4         shape0\cf7 \strokec7 ,\cf5 \strokec5  shape1\cf7 \strokec7 ,\cf5 \strokec5  files = \cf7 \strokec7 [],\cf5 \strokec5  \cf7 \strokec7 [],\cf5 \strokec5  \cf7 \strokec7 []\cf5 \strokec5   \cf3 \strokec3 # image and inference shapes, filenames\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 for\cf5 \strokec5  i\cf7 \strokec7 ,\cf5 \strokec5  im \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 enumerate\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4             f = f\cf9 \strokec9 'image\{i\}'\cf5 \strokec5   \cf3 \strokec3 # filename\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 str\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # filename or uri\cf5 \cb1 \strokec5 \
+\cb4                 im\cf7 \strokec7 ,\cf5 \strokec5  f = np.asarray\cf7 \strokec7 (\cf5 \strokec5 Image.\cf6 \strokec6 open\cf7 \strokec7 (\cf5 \strokec5 requests.get\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  stream=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5 .raw \cf6 \strokec6 if\cf5 \strokec5  im.startswith\cf7 \strokec7 (\cf9 \strokec9 'http'\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  im\cf7 \strokec7 )),\cf5 \strokec5  im\cb1 \
+\cb4             \cf6 \strokec6 elif\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  Image.Image\cf7 \strokec7 ):\cf5 \strokec5   \cf3 \strokec3 # PIL Image\cf5 \cb1 \strokec5 \
+\cb4                 im\cf7 \strokec7 ,\cf5 \strokec5  f = np.asarray\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ),\cf5 \strokec5  \cf6 \strokec6 getattr\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'filename'\cf7 \strokec7 ,\cf5 \strokec5  f\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 or\cf5 \strokec5  f\cb1 \
+\cb4             files.append\cf7 \strokec7 (\cf5 \strokec5 Path\cf7 \strokec7 (\cf5 \strokec5 f\cf7 \strokec7 )\cf5 \strokec5 .with_suffix\cf7 \strokec7 (\cf9 \strokec9 '.jpg'\cf7 \strokec7 )\cf5 \strokec5 .name\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  im.shape\cf7 \strokec7 [\cf8 \strokec8 0\cf7 \strokec7 ]\cf5 \strokec5  < \cf8 \strokec8 5\cf7 \strokec7 :\cf5 \strokec5   \cf3 \strokec3 # image in CHW\cf5 \cb1 \strokec5 \
+\cb4                 im = im.transpose\cf7 \strokec7 ((\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 2\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 ))\cf5 \strokec5   \cf3 \strokec3 # reverse dataloader .transpose(2, 0, 1)\cf5 \cb1 \strokec5 \
+\cb4             im = im\cf7 \strokec7 [:,\cf5 \strokec5  \cf7 \strokec7 :,\cf5 \strokec5  \cf7 \strokec7 :\cf8 \strokec8 3\cf7 \strokec7 ]\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  im.ndim == \cf8 \strokec8 3\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  np.tile\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 [:,\cf5 \strokec5  \cf7 \strokec7 :,\cf5 \strokec5  \cf6 \strokec6 None\cf7 \strokec7 ],\cf5 \strokec5  \cf8 \strokec8 3\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # enforce 3ch input\cf5 \cb1 \strokec5 \
+\cb4             s = im.shape\cf7 \strokec7 [:\cf8 \strokec8 2\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # HWC\cf5 \cb1 \strokec5 \
+\cb4             shape0.append\cf7 \strokec7 (\cf5 \strokec5 s\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # image shape\cf5 \cb1 \strokec5 \
+\cb4             g = \cf7 \strokec7 (\cf5 \strokec5 size / \cf6 \strokec6 max\cf7 \strokec7 (\cf5 \strokec5 s\cf7 \strokec7 ))\cf5 \strokec5   \cf3 \strokec3 # gain\cf5 \cb1 \strokec5 \
+\cb4             shape1.append\cf7 \strokec7 ([\cf5 \strokec5 y * g \cf6 \strokec6 for\cf5 \strokec5  y \cf6 \strokec6 in\cf5 \strokec5  s\cf7 \strokec7 ])\cf5 \cb1 \strokec5 \
+\cb4             imgs\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]\cf5 \strokec5  = im \cf6 \strokec6 if\cf5 \strokec5  im.data.contiguous \cf6 \strokec6 else\cf5 \strokec5  np.ascontiguousarray\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # update\cf5 \cb1 \strokec5 \
+\cb4         shape1 = \cf7 \strokec7 [\cf5 \strokec5 make_divisible\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 int\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .stride.\cf6 \strokec6 max\cf7 \strokec7 ()))\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  np.stack\cf7 \strokec7 (\cf5 \strokec5 shape1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 max\cf7 \strokec7 (\cf8 \strokec8 0\cf7 \strokec7 )]\cf5 \strokec5   \cf3 \strokec3 # inference shape\cf5 \cb1 \strokec5 \
+\cb4         x = \cf7 \strokec7 [\cf5 \strokec5 letterbox\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  new_shape=shape1\cf7 \strokec7 ,\cf5 \strokec5  auto=\cf6 \strokec6 False\cf7 \strokec7 )[\cf8 \strokec8 0\cf7 \strokec7 ]\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  im \cf6 \strokec6 in\cf5 \strokec5  imgs\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # pad\cf5 \cb1 \strokec5 \
+\cb4         x = np.stack\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  n > \cf8 \strokec8 1\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  x\cf7 \strokec7 [\cf8 \strokec8 0\cf7 \strokec7 ][\cf6 \strokec6 None\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # stack\cf5 \cb1 \strokec5 \
+\cb4         x = np.ascontiguousarray\cf7 \strokec7 (\cf5 \strokec5 x.transpose\cf7 \strokec7 ((\cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 3\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 2\cf7 \strokec7 )))\cf5 \strokec5   \cf3 \strokec3 # BHWC to BCHW\cf5 \cb1 \strokec5 \
+\cb4         x = torch.from_numpy\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 )\cf5 \strokec5 .to\cf7 \strokec7 (\cf5 \strokec5 p.device\cf7 \strokec7 )\cf5 \strokec5 .type_as\cf7 \strokec7 (\cf5 \strokec5 p\cf7 \strokec7 )\cf5 \strokec5  / \cf8 \strokec8 255\cf5 \strokec5 .  \cf3 \strokec3 # uint8 to fp16/32\cf5 \cb1 \strokec5 \
+\cb4         t.append\cf7 \strokec7 (\cf5 \strokec5 time_synchronized\cf7 \strokec7 ())\cf5 \cb1 \strokec5 \
+\
+\cb4         \cf6 \strokec6 with\cf5 \strokec5  amp.autocast\cf7 \strokec7 (\cf5 \strokec5 enabled=p.device.\cf6 \strokec6 type\cf5 \strokec5  != \cf9 \strokec9 'cpu'\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4             \cf3 \strokec3 # Inference\cf5 \cb1 \strokec5 \
+\cb4             y = \cf6 \strokec6 self\cf5 \strokec5 .model\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  augment\cf7 \strokec7 ,\cf5 \strokec5  profile\cf7 \strokec7 )[\cf8 \strokec8 0\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # forward\cf5 \cb1 \strokec5 \
+\cb4             t.append\cf7 \strokec7 (\cf5 \strokec5 time_synchronized\cf7 \strokec7 ())\cf5 \cb1 \strokec5 \
+\cb4             \cb1 \
+\cb4             \cf3 \strokec3 # Post-process\cf5 \cb1 \strokec5 \
+\cb4             y = polygon_non_max_suppression\cf7 \strokec7 (\cf5 \strokec5 y\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .conf\cf7 \strokec7 ,\cf5 \strokec5  iou_thres=\cf6 \strokec6 self\cf5 \strokec5 .iou\cf7 \strokec7 ,\cf5 \strokec5  classes=\cf6 \strokec6 self\cf5 \strokec5 .classes\cf7 \strokec7 ,\cf5 \strokec5  max_det=\cf6 \strokec6 self\cf5 \strokec5 .max_det\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # Polygon NMS\cf5 \cb1 \strokec5 \
+\
+\cb4             \cf6 \strokec6 for\cf5 \strokec5  i \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 range\cf7 \strokec7 (\cf5 \strokec5 n\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4                 polygon_scale_coords\cf7 \strokec7 (\cf5 \strokec5 shape1\cf7 \strokec7 ,\cf5 \strokec5  y\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ][:,\cf5 \strokec5  \cf7 \strokec7 :\cf8 \strokec8 8\cf7 \strokec7 ],\cf5 \strokec5  shape0\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ])\cf5 \cb1 \strokec5 \
+\
+\cb4             t.append\cf7 \strokec7 (\cf5 \strokec5 time_synchronized\cf7 \strokec7 ())\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 return\cf5 \strokec5  Polygon_Detections\cf7 \strokec7 (\cf5 \strokec5 imgs\cf7 \strokec7 ,\cf5 \strokec5  y\cf7 \strokec7 ,\cf5 \strokec5  files\cf7 \strokec7 ,\cf5 \strokec5  t\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .names\cf7 \strokec7 ,\cf5 \strokec5  x.shape\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4         \cb1 \
+\cb4         \cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb4 \strokec6 class\cf5 \strokec5  Polygon_Detections\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4     \cf3 \strokec3 # polygon detections class for YOLOv5 inference results\cf5 \cb1 \strokec5 \
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 __init__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  imgs\cf7 \strokec7 ,\cf5 \strokec5  pred\cf7 \strokec7 ,\cf5 \strokec5  files\cf7 \strokec7 ,\cf5 \strokec5  times=\cf6 \strokec6 None\cf7 \strokec7 ,\cf5 \strokec5  names=\cf6 \strokec6 None\cf7 \strokec7 ,\cf5 \strokec5  shape=\cf6 \strokec6 None\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 super\cf7 \strokec7 (\cf5 \strokec5 Polygon_Detections\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 __init__\cf7 \strokec7 ()\cf5 \cb1 \strokec5 \
+\cb4         d = pred\cf7 \strokec7 [\cf8 \strokec8 0\cf7 \strokec7 ]\cf5 \strokec5 .device  \cf3 \strokec3 # device\cf5 \cb1 \strokec5 \
+\cb4         gn = \cf7 \strokec7 [\cf5 \strokec5 torch.tensor\cf7 \strokec7 ([\cf5 \strokec5 *\cf7 \strokec7 [\cf5 \strokec5 im.shape\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  i \cf6 \strokec6 in\cf5 \strokec5  \cf7 \strokec7 [\cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 0\cf7 \strokec7 ]],\cf5 \strokec5  \cf8 \strokec8 1\cf5 \strokec5 .\cf7 \strokec7 ,\cf5 \strokec5  \cf8 \strokec8 1\cf5 \strokec5 .\cf7 \strokec7 ],\cf5 \strokec5  device=d\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  im \cf6 \strokec6 in\cf5 \strokec5  imgs\cf7 \strokec7 ]\cf5 \strokec5   \cf3 \strokec3 # normalizations\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .imgs = imgs  \cf3 \strokec3 # list of images as numpy arrays, images should be pixel-level and with shape (height, width, channel)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .pred = pred  \cf3 \strokec3 # list of tensors: pred[0] = (xyxyxyxy, conf, cls)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .names = names  \cf3 \strokec3 # class names\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .files = files  \cf3 \strokec3 # image filenames\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .xyxyxyxy = pred  \cf3 \strokec3 # xyxyxyxy pixels\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .xyxyxyxyn = \cf7 \strokec7 [\cf5 \strokec5 x / g \cf6 \strokec6 for\cf5 \strokec5  x\cf7 \strokec7 ,\cf5 \strokec5  g \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 zip\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .xyxyxyxy\cf7 \strokec7 ,\cf5 \strokec5  gn\cf7 \strokec7 )]\cf5 \strokec5   \cf3 \strokec3 # xyxyxyxy normalized\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .n = \cf6 \strokec6 len\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .pred\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # number of images (batch size)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .t = \cf6 \strokec6 tuple\cf7 \strokec7 ((\cf5 \strokec5 times\cf7 \strokec7 [\cf5 \strokec5 i + \cf8 \strokec8 1\cf7 \strokec7 ]\cf5 \strokec5  - times\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ])\cf5 \strokec5  * \cf8 \strokec8 1000\cf5 \strokec5  / \cf6 \strokec6 self\cf5 \strokec5 .n \cf6 \strokec6 for\cf5 \strokec5  i \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 range\cf7 \strokec7 (\cf8 \strokec8 3\cf7 \strokec7 ))\cf5 \strokec5   \cf3 \strokec3 # timestamps (ms)\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .s = shape  \cf3 \strokec3 # inference BCHW shape\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  display\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  pprint=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  show=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  save=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  crop=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  render=\cf6 \strokec6 False\cf7 \strokec7 ,\cf5 \strokec5  save_dir=Path\cf7 \strokec7 (\cf9 \strokec9 ''\cf7 \strokec7 )):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 assert\cf5 \strokec5  \cf6 \strokec6 not\cf5 \strokec5  crop\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'polygon does not support crop and cutout.'\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 for\cf5 \strokec5  i\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  pred\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 enumerate\cf7 \strokec7 (\cf6 \strokec6 zip\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .imgs\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .pred\cf7 \strokec7 )):\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 str\cf5 \strokec5  = f\cf9 \strokec9 'image \{i + 1\}/\{len(self.pred)\}: \{im.shape[0]\}x\{im.shape[1]\} '\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  pred \cf6 \strokec6 is\cf5 \strokec5  \cf6 \strokec6 not\cf5 \strokec5  \cf6 \strokec6 None\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 for\cf5 \strokec5  c \cf6 \strokec6 in\cf5 \strokec5  pred\cf7 \strokec7 [:,\cf5 \strokec5  \cf8 \strokec8 -1\cf7 \strokec7 ]\cf5 \strokec5 .unique\cf7 \strokec7 ():\cf5 \cb1 \strokec5 \
+\cb4                     n = \cf7 \strokec7 (\cf5 \strokec5 pred\cf7 \strokec7 [:,\cf5 \strokec5  \cf8 \strokec8 -1\cf7 \strokec7 ]\cf5 \strokec5  == c\cf7 \strokec7 )\cf5 \strokec5 .\cf6 \strokec6 sum\cf7 \strokec7 ()\cf5 \strokec5   \cf3 \strokec3 # detections per class\cf5 \cb1 \strokec5 \
+\cb4                     \cf6 \strokec6 str\cf5 \strokec5  += f\cf9 \strokec9 "\{n\} \{self.names[int(c)]\}\{'s' * (n > 1)\}, "\cf5 \strokec5   \cf3 \strokec3 # add to string\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 if\cf5 \strokec5  show \cf6 \strokec6 or\cf5 \strokec5  save \cf6 \strokec6 or\cf5 \strokec5  render\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                     \cf6 \strokec6 for\cf5 \strokec5  *box\cf7 \strokec7 ,\cf5 \strokec5  conf\cf7 \strokec7 ,\cf5 \strokec5  cls \cf6 \strokec6 in\cf5 \strokec5  pred\cf7 \strokec7 :\cf5 \strokec5   \cf3 \strokec3 # xyxyxyxy, confidence, class\cf5 \cb1 \strokec5 \
+\cb4                         label = f\cf9 \strokec9 '\{self.names[int(cls)]\} \{conf:.2f\}'\cf5 \cb1 \strokec5 \
+\cb4                         polygon_plot_one_box\cf7 \strokec7 (\cf5 \strokec5 torch.tensor\cf7 \strokec7 (\cf5 \strokec5 box\cf7 \strokec7 ,\cf5 \strokec5  device=\cf9 \strokec9 'cpu'\cf7 \strokec7 )\cf5 \strokec5 .numpy\cf7 \strokec7 (),\cf5 \strokec5  im\cf7 \strokec7 ,\cf5 \strokec5  label=label\cf7 \strokec7 ,\cf5 \strokec5  color=colors\cf7 \strokec7 (\cf5 \strokec5 cls\cf7 \strokec7 ))\cf5 \cb1 \strokec5 \
+\cb4             im = Image.fromarray\cf7 \strokec7 (\cf5 \strokec5 im.astype\cf7 \strokec7 (\cf5 \strokec5 np.uint8\cf7 \strokec7 ))\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  \cf6 \strokec6 isinstance\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 ,\cf5 \strokec5  np.ndarray\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  im  \cf3 \strokec3 # from np\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  pprint\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 print\cf7 \strokec7 (\cf6 \strokec6 str\cf5 \strokec5 .rstrip\cf7 \strokec7 (\cf9 \strokec9 ', '\cf7 \strokec7 ))\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  show\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 im.show\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .files\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ])\cf5 \strokec5   \cf3 \strokec3 # show\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  save\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 f = \cf6 \strokec6 self\cf5 \strokec5 .files\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]\cf5 \cb1 \strokec5 \
+\cb4                 im.save\cf7 \strokec7 (\cf5 \strokec5 save_dir / f\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # save\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 print\cf7 \strokec7 (\cf5 \strokec5 f\cf9 \strokec9 "\{'Saved' * (i == 0)\} \{f\}"\cf7 \strokec7 ,\cf5 \strokec5  end=\cf9 \strokec9 ','\cf5 \strokec5  \cf6 \strokec6 if\cf5 \strokec5  i < \cf6 \strokec6 self\cf5 \strokec5 .n - \cf8 \strokec8 1\cf5 \strokec5  \cf6 \strokec6 else\cf5 \strokec5  f\cf9 \strokec9 ' to \{save_dir\}\\n'\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 if\cf5 \strokec5  render\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 self\cf5 \strokec5 .imgs\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]\cf5 \strokec5  = np.asarray\cf7 \strokec7 (\cf5 \strokec5 im\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  \cf6 \strokec6 print\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .display\cf7 \strokec7 (\cf5 \strokec5 pprint=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # print results\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 print\cf7 \strokec7 (\cf5 \strokec5 f\cf9 \strokec9 'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape \{tuple(self.s)\}'\cf5 \strokec5  % \cf6 \strokec6 self\cf5 \strokec5 .t\cf7 \strokec7 )\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  show\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .display\cf7 \strokec7 (\cf5 \strokec5 show=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # show results\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  save\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  save_dir=\cf9 \strokec9 'runs/hub/exp'\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         save_dir = increment_path\cf7 \strokec7 (\cf5 \strokec5 save_dir\cf7 \strokec7 ,\cf5 \strokec5  exist_ok=save_dir != \cf9 \strokec9 'runs/hub/exp'\cf7 \strokec7 ,\cf5 \strokec5  mkdir=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # increment save_dir\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .display\cf7 \strokec7 (\cf5 \strokec5 save=\cf6 \strokec6 True\cf7 \strokec7 ,\cf5 \strokec5  save_dir=save_dir\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # save results\cf5 \cb1 \strokec5 \
+\cb4     \cb1 \
+\cb4     \cf3 \strokec3 # polygon does not support cutout\cf5 \cb1 \strokec5 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  render\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 self\cf5 \strokec5 .display\cf7 \strokec7 (\cf5 \strokec5 render=\cf6 \strokec6 True\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # render results\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .imgs\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  pandas\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 # return detections as pandas DataFrames, i.e. print(results.pandas().xyxyxyxy[0])\cf5 \cb1 \strokec5 \
+\cb4         new = copy\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 )\cf5 \strokec5   \cf3 \strokec3 # return copy\cf5 \cb1 \strokec5 \
+\cb4         ca = \cf9 \strokec9 'x1'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'y1'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'x2'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'y2'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'x3'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'y3'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'x4'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'y4'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'confidence'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'class'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'name'\cf5 \strokec5   \cf3 \strokec3 # xyxyxyxy columns\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 for\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  c \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 zip\cf7 \strokec7 ([\cf9 \strokec9 'xyxyxyxy'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xyxyxyxyn'\cf7 \strokec7 ],\cf5 \strokec5  \cf7 \strokec7 [\cf5 \strokec5 ca\cf7 \strokec7 ,\cf5 \strokec5  ca\cf7 \strokec7 ]):\cf5 \cb1 \strokec5 \
+\cb4             a = \cf7 \strokec7 [[\cf5 \strokec5 x\cf7 \strokec7 [:\cf8 \strokec8 9\cf7 \strokec7 ]\cf5 \strokec5  + \cf7 \strokec7 [\cf6 \strokec6 int\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 [\cf8 \strokec8 9\cf7 \strokec7 ]),\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .names\cf7 \strokec7 [\cf6 \strokec6 int\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 [\cf8 \strokec8 9\cf7 \strokec7 ])]]\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  x.tolist\cf7 \strokec7 ()]\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 getattr\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 )]\cf5 \strokec5   \cf3 \strokec3 # update\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 setattr\cf7 \strokec7 (\cf5 \strokec5 new\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  \cf7 \strokec7 [\cf5 \strokec5 pd.DataFrame\cf7 \strokec7 (\cf5 \strokec5 x\cf7 \strokec7 ,\cf5 \strokec5  columns=c\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  x \cf6 \strokec6 in\cf5 \strokec5  a\cf7 \strokec7 ])\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  new\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  tolist\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf3 \strokec3 # return a list of Polygon_Detections objects, i.e. 'for result in results.tolist():'\cf5 \cb1 \strokec5 \
+\cb4         x = \cf7 \strokec7 [\cf5 \strokec5 Polygon_Detections\cf7 \strokec7 ([\cf6 \strokec6 self\cf5 \strokec5 .imgs\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]],\cf5 \strokec5  \cf7 \strokec7 [\cf6 \strokec6 self\cf5 \strokec5 .pred\cf7 \strokec7 [\cf5 \strokec5 i\cf7 \strokec7 ]],\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .names\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .s\cf7 \strokec7 )\cf5 \strokec5  \cf6 \strokec6 for\cf5 \strokec5  i \cf6 \strokec6 in\cf5 \strokec5  \cf6 \strokec6 range\cf7 \strokec7 (\cf6 \strokec6 self\cf5 \strokec5 .n\cf7 \strokec7 )]\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 for\cf5 \strokec5  d \cf6 \strokec6 in\cf5 \strokec5  x\cf7 \strokec7 :\cf5 \cb1 \strokec5 \
+\cb4             \cf6 \strokec6 for\cf5 \strokec5  k \cf6 \strokec6 in\cf5 \strokec5  \cf7 \strokec7 [\cf9 \strokec9 'imgs'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'pred'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xyxyxyxy'\cf7 \strokec7 ,\cf5 \strokec5  \cf9 \strokec9 'xyxyxyxyn'\cf7 \strokec7 ]:\cf5 \cb1 \strokec5 \
+\cb4                 \cf6 \strokec6 setattr\cf7 \strokec7 (\cf5 \strokec5 d\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 ,\cf5 \strokec5  \cf6 \strokec6 getattr\cf7 \strokec7 (\cf5 \strokec5 d\cf7 \strokec7 ,\cf5 \strokec5  k\cf7 \strokec7 )[\cf8 \strokec8 0\cf7 \strokec7 ])\cf5 \strokec5   \cf3 \strokec3 # pop out of list\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  x\cb1 \
+\
+\cb4     \cf6 \strokec6 def\cf5 \strokec5  __len__\cf7 \strokec7 (\cf6 \strokec6 self\cf7 \strokec7 ):\cf5 \cb1 \strokec5 \
+\cb4         \cf6 \strokec6 return\cf5 \strokec5  \cf6 \strokec6 self\cf5 \strokec5 .n\cb1 \
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs23\fsmilli11900 \cf2 \strokec2 \
+\
+\
+\
+\
+\
+\
+\
+\
+class SPPF(nn.Module):\
+    # Spatial Pyramid Pooling - Fast (SPPF) layer for YOLOv5 by Glenn Jocher\
+    def __init__(self, c1, c2, k=5):  # equivalent to SPP(k=(5, 9, 13))\
+        super().__init__()\
+        c_ = c1 // 2  # hidden channels\
+        self.cv1 = Conv(c1, c_, 1, 1)\
+        self.cv2 = Conv(c_ * 4, c2, 1, 1)\
+        self.m = nn.MaxPool2d(kernel_size=k, stride=1, padding=k // 2)\
+\
+    def forward(self, x):\
+        x = self.cv1(x)\
+        with warnings.catch_warnings():\
+            warnings.simplefilter('ignore')  # suppress torch 1.9.0 max_pool2d() warning\
+            y1 = self.m(x)\
+            y2 = self.m(y1)\
+            return self.cv2(torch.cat([x, y1, y2, self.m(y2)], 1))\
+}
